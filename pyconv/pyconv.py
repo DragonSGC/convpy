@@ -10,6 +10,9 @@ License:
     for details.
 """
 
+import click
+
+
 def convert_num(given_num: int, convert_to: str) -> str:
     """
     Takes in a base 10 interger, uses a flag, to convert to
@@ -129,4 +132,40 @@ def input_to_int(input_num: str, input_base: str) -> int:
         case _:
             raise ValueError("Invalid base type flag, only 'b', 'o', 'd' or 'x"\
                             "type pyconv --help for more information")
+        
+
+@click.command
+@click.argument('input_num')
+@click.argument('input_base')
+@click.option('-b', '--binary', flag_value='b', help='dets the target of the ' \
+            'conversion to binary')
+@click.option('-o', '--octal', flag_value='o', help='dets the target of the ' \
+            'conversion to octal')
+@click.option('-d', '--decimal', flag_value='d', help='dets the target of the ' \
+            'conversion to decimal')
+@click.option('-x', '--hex', flag_value='x', help='dets the target of the ' \
+            'conversion to hexidecimal')
+def pyconv(input_num: str, input_base: str,binary: str, octal: str, 
+            decimal: str, hex: str, ) -> None:
+    """
+        Takes in the input number and input base ('b', 'o', 'd', 'x') and a flag
+        to convert the number to a different base type.
+    """
+    options_list = [binary, octal, decimal, hex]
+
+    if input_base in options_list:
+        click.echo(input_num)
+        return
+
+    for option in options_list:
+        if option is not None:
+            try:
+                click.echo(convert_num(input_to_int(input_num, input_base), 
+                                    option))
+            except ValueError as ve:
+                click.echo(ve)
+
+
+if __name__ == '__main__':
+    pyconv()    
 
