@@ -62,10 +62,7 @@ def oct_input_validation(unvalidated_input: str) -> bool:
     Returns:
         bool: return True or False depending on the outcome of the validation
     """
-    if unvalidated_input.isdecimal():
-        return all(char not in '8' for char in unvalidated_input)
-    else:
-        return False
+    return all(char in '01234567' for char in unvalidated_input)
 
 
 def dec_input_validation(unvalidated_input: str) -> bool:
@@ -93,10 +90,9 @@ def hex_input_validation(unvalidated_input: str) -> bool:
     Returns:
         bool: return True or False depending on the outcome of the validation
     """
-    if unvalidated_input.isalnum():
-        return all(char in '123456789ABCDEF' for char in unvalidated_input)
-    else:
-        return False
+
+    return all(char in '0123456789ABCDEF' for char in unvalidated_input)
+
     
 
 def input_to_int(input_num: str, input_base: str) -> int:
@@ -134,36 +130,29 @@ def input_to_int(input_num: str, input_base: str) -> int:
                             "type pyconv --help for more information")
         
 
-@click.command
+@click.command()
 @click.argument('input_num')
-@click.argument('input_base')
-@click.option('-b', '--binary', flag_value='b', help='dets the target of the ' \
-            'conversion to binary')
-@click.option('-o', '--octal', flag_value='o', help='dets the target of the ' \
-            'conversion to octal')
-@click.option('-d', '--decimal', flag_value='d', help='dets the target of the ' \
-            'conversion to decimal')
-@click.option('-x', '--hex', flag_value='x', help='dets the target of the ' \
-            'conversion to hexidecimal')
-def pyconv(input_num: str, input_base: str,binary: str, octal: str, 
-            decimal: str, hex: str, ) -> None:
+@click.argument('input_base', type=click.Choice(['b', 'o', 'd', 'x'], case_sensitive=False))
+@click.option('-b', '--binary', 'convert_to', flag_value='b', help='Convert to binary')
+@click.option('-o', '--octal', 'convert_to', flag_value='o', help='Convert to octal')
+@click.option('-d', '--decimal', 'convert_to', flag_value='d', help='Convert to decimal')
+@click.option('-x', '--hex', 'convert_to', flag_value='X', help='Convert to hexadecimal')
+def pyconv(input_num: str, input_base: str, convert_to: str) -> None:
     """
-        Takes in the input number and input base ('b', 'o', 'd', 'x') and a flag
-        to convert the number to a different base type.
+    Convert a number from one base to another.
+    
+    Args:
+        input_num (str): Number to convert.
+        input_base (str): Base of the input number ('b', 'o', 'd', 'x').
+        convert_to (str): Base to convert the number to ('b', 'o', 'd', 'X').
     """
-    options_list = [binary, octal, decimal, hex]
+    if not convert_to:
+        raise click.UsageError("You must specify a target conversion base using -b, -o, -d, or -x.")
 
-    if input_base in options_list:
-        click.echo(input_num)
-        return
-
-    for option in options_list:
-        if option is not None:
-            try:
-                click.echo(convert_num(input_to_int(input_num, input_base), 
-                                    option))
-            except ValueError as ve:
-                click.echo(ve)
+    try:
+        click.echo(convert_num(input_to_int(input_num, input_base), convert_to))
+    except ValueError as ve:
+        click.echo(ve)
 
 
 if __name__ == '__main__':
