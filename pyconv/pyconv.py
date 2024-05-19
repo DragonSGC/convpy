@@ -16,8 +16,7 @@ import click
 def convert_num(given_num: int, convert_to: str) -> str:
     """
     Takes in a base 10 interger, uses a flag, to convert to
-        match which conversion is correct. Raises ValueError if convert_to does
-        not match, 'b', 'o', 'd', 'X'
+        match which conversion is correct. 
 
     Args:
         given_num (int): decimal base 10 number
@@ -25,6 +24,9 @@ def convert_num(given_num: int, convert_to: str) -> str:
 
     Returns:
         str: string representation of the converted number
+
+    Raises:
+        ValueError if convert_to does not match, 'b', 'o', 'd', 'X'
     """
     match convert_to:
         case 'b':
@@ -39,104 +41,70 @@ def convert_num(given_num: int, convert_to: str) -> str:
             raise ValueError("No such base conversion type")
         
 
-def binary_input_validation(unvalidated_input: str) -> bool:
-    """
-    Checks to see if only '1' and '0' are present in the input
 
+def input_validation(user_input: str) -> dict:
+    """
+        Takes in a user input and uses boolean character validation on it
     Args:
-        unvalidated_input (str): user inputted number for conversion
+        user_input (str): user input number to perform validation on
 
     Returns:
-        bool: return True or False depending on the outcome of the validation
+        dict: dictionary with keys being 'b', 'o', 'd', 'x' and values being
+            boolean validations
     """
-    return all(char in '01' for char in unvalidated_input)
+    return {
+        'b' : all(char in '01' for char in user_input),
+        'o' : all(char in '01234567' for char in user_input),
+        'd': user_input.isdecimal(),
+        'x': all(char in '0123456789ABCDEF' for char in user_input)
+    }
 
-
-def oct_input_validation(unvalidated_input: str) -> bool:
-    """
-    Uses isdecimal() as well as checking there are no 8's in the input
-
-    Args:
-        unvalidated_input (str): user inputted number for conversion
-
-    Returns:
-        bool: return True or False depending on the outcome of the validation
-    """
-    return all(char in '01234567' for char in unvalidated_input)
-
-
-def dec_input_validation(unvalidated_input: str) -> bool:
-    """
-    Uses isdecimal() to validate, octal and decimal such that they 
-    only contain decimal values.
-
-    Args:
-        unvalidated_input (str): user inputted number for conversion
-
-    Returns:
-        bool: return True or False depending on the outcome of the validation
-    """
-    return unvalidated_input.isdecimal()
-
-
-def hex_input_validation(unvalidated_input: str) -> bool:
-    """
-    Uses isalnum() in conjuction with a list A-F to represent accepted
-    hexidecimal numbers ie 6Z would be invalid.
-
-    Args:
-        unvalidated_input (str): user inputted number for conversion
-
-    Returns:
-        bool: return True or False depending on the outcome of the validation
-    """
-
-    return all(char in '0123456789ABCDEF' for char in unvalidated_input)
-
-    
 
 def input_to_int(input_num: str, input_base: str) -> int:
-    """Takes a given input number as well as its flag for its base type, either
+    """
+    Takes a given input number as well as its flag for its base type, either
     'b' for binary, 'o' for octal, 'd' for decimal, 'x' for hexidecimal. 
-    Performs input validation on the string with for Raises ValueError on 
-    invalid number input and flag input
+    Performs input validation on the string.
 
     Args:
         input_num (str): string representation of a number input by user
-        input_base (str): flag representing base type of number
+        input_base (str): flag representing base type of number.
 
     Returns:
-        int: interger value of the user inputted number
+        int: interger value of the user inputted number.
+
+    Raises:
+        ValueError on invalid number input and flag input.
     """
-    match input_base:
-        case 'b':
-            if  not binary_input_validation(input_num):
-                raise ValueError("Invalid Binary number")
-            return int(input_num, base=2)
-        case 'o':
-            if not oct_input_validation(input_num):
-                raise ValueError("Invalid Octal number")
-            return int(input_num, base=8)
-        case 'd':
-            if not dec_input_validation(input_num):
-                raise ValueError("Invalid Decimal number")
-            return int(input_num)
-        case 'x':
-            if not hex_input_validation(input_num):
-                raise ValueError("Invalid Hexidecimal number")
-            return int(input_num, base=16)
-        case _:
-            raise ValueError("Invalid base type flag, only 'b', 'o', 'd' or 'x"\
-                            "type pyconv --help for more information")
+
+    # Enforcing user choice from click.Choice() ensures these will be the values
+    base_conversion_functions = {
+    'b': lambda num: int(num, base=2),
+    'o': lambda num: int(num, base=8),
+    'd': int,
+    'x': lambda num: int(num, base=16),
+    }
+
+    if not input_validation(input_num).get(input_base):
+        raise ValueError(f"Invalid {input_base.upper()} number")
+    try:
+        return base_conversion_functions[input_base](input_num)
+    except KeyError:
+        raise ValueError("Invalid base type flag, only 'b', 'o', 'd' or 'x'")
         
 
 @click.command()
 @click.argument('input_num')
-@click.argument('input_base', type=click.Choice(['b', 'o', 'd', 'x'], case_sensitive=False))
-@click.option('-b', '--binary', 'convert_to', flag_value='b', help='Convert to binary')
-@click.option('-o', '--octal', 'convert_to', flag_value='o', help='Convert to octal')
-@click.option('-d', '--decimal', 'convert_to', flag_value='d', help='Convert to decimal')
-@click.option('-x', '--hex', 'convert_to', flag_value='X', help='Convert to hexadecimal')
+@click.argument('input_base', type=click.Choice(['b', 'o', 'd', 'x'], 
+                                                case_sensitive=False))
+@click.option('-b', '--binary', 'convert_to', flag_value='b', 
+            help='Convert to binary')
+@click.option('-o', '--octal', 'convert_to', flag_value='o', 
+            help='Convert to octal')
+@click.option('-d', '--decimal', 'convert_to', flag_value='d', 
+            help='Convert to decimal')
+@click.option('-x', '--hex', 'convert_to', flag_value='X', 
+            help='Convert to hexadecimal')
 def pyconv(input_num: str, input_base: str, convert_to: str) -> None:
     """
     Convert a number from one base to another.
@@ -147,12 +115,15 @@ def pyconv(input_num: str, input_base: str, convert_to: str) -> None:
         convert_to (str): Base to convert the number to ('b', 'o', 'd', 'X').
     """
     if not convert_to:
-        raise click.UsageError("You must specify a target conversion base using -b, -o, -d, or -x.")
+        raise click.UsageError("You must specify a target conversion "\
+                            "base using -b, -o, -d, or -x.")
 
     try:
         click.echo(convert_num(input_to_int(input_num, input_base), convert_to))
     except ValueError as ve:
         click.echo(ve)
+    except KeyError as ke:
+        click.echo(ke)
 
 
 if __name__ == '__main__':

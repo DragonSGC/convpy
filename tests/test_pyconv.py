@@ -14,11 +14,8 @@ from random import randint
 import pytest
 from pyconv.pyconv import (
     convert_num, 
-    binary_input_validation,
     input_to_int,
-    oct_input_validation,
-    dec_input_validation,
-    hex_input_validation)
+    input_validation)
 
 
 @pytest.fixture(scope='module')
@@ -151,8 +148,8 @@ def test_binary_validation() -> None:
     invalid_binary: str = '10001113'
     vaild_binary: str = '10111011'
 
-    assert binary_input_validation(invalid_binary) is False
-    assert binary_input_validation(vaild_binary) is True
+    assert input_validation(invalid_binary).get('b') is False
+    assert input_validation(vaild_binary).get('b') is True
 
 def test_oct_validation() -> None:
     """
@@ -163,9 +160,9 @@ def test_oct_validation() -> None:
     invalid_oct_char: str = '133D'
     valid_oct: str = '324'
 
-    assert oct_input_validation(invalid_oct_8) is False
-    assert oct_input_validation(invalid_oct_char) is False
-    assert oct_input_validation(valid_oct) is True
+    assert input_validation(invalid_oct_8).get('o') is False
+    assert input_validation(invalid_oct_char).get('o') is False
+    assert input_validation(valid_oct).get('o') is True
 
 def test_dec_validation() -> None:
     """
@@ -175,8 +172,8 @@ def test_dec_validation() -> None:
     invalid_dec: str = '123456f'
     valid_dec: str = '1234567'
 
-    assert dec_input_validation(invalid_dec) is False
-    assert dec_input_validation(valid_dec) is True
+    assert input_validation(invalid_dec).get('d') is False
+    assert input_validation(valid_dec).get('d') is True
 
 
 def test_hex_validation() -> None:
@@ -189,9 +186,9 @@ def test_hex_validation() -> None:
     invalid_form_hex: str = '2a'
     valid_hex: str = '4B'
 
-    assert hex_input_validation(invalid_hex) is False
-    assert hex_input_validation(invalid_form_hex) is False
-    assert hex_input_validation(valid_hex) is True
+    assert input_validation(invalid_hex).get('x') is False
+    assert input_validation(invalid_form_hex).get('x') is False
+    assert input_validation(valid_hex).get('x') is True
 
 
 def test_if_input_to_int_is_accurate(base_nums) -> None:
