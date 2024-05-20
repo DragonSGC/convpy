@@ -1,7 +1,17 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.5.0
     hooks:
-      - id: tox
-        name: Run tox tests
-        stages: [commit]
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+    - id: flake8
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+    - id: black
+
+
