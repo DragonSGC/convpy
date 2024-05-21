@@ -92,6 +92,33 @@ def input_to_int(input_num: str, input_base: str) -> int:
         raise ValueError("Invalid base type flag, only 'b', 'o', 'd' or 'x'")
 
 
+def convert_from_file_to_file(
+    input_path: click.Path, output_path: click.Path, input_base: str, convert_to: str
+) -> None:
+    """
+    Takes in two file paths, an input file and output file, using click file
+    path validation on the input file. Reads in line by line,  writes the
+    converted values to the output file.
+
+    Args:
+        input_path (click.Path): Input file path
+        output_path (click.Path): output file path, file will be created if it
+        doesn't exist
+        input_base (str): flag representing base type of numbers in the file.
+    """
+    with open(input_path, "r") as inp, open(output_path, "w") as out:
+        for line in inp:
+            num: str = line.rstrip()
+            try:
+                converted_num: str = convert_num(
+                    input_to_int(num, input_base), convert_to
+                )
+            except ValueError as ve:
+                print(ve)  # TODO add logging here as not to pollute terminal
+            else:
+                out.write(converted_num + "\n")
+
+
 @click.group()
 def pyconv():
     pass
@@ -142,3 +169,4 @@ if __name__ == "__main__":
 
 # TODO investigate how convert command can be run by calling pyconv args
 # TODO make the from file run as a background process as not to lock the terminal
+# TODO write to log file when exception not to pollute the terminal

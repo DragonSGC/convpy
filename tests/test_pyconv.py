@@ -10,10 +10,17 @@ License:
     for details.
 """
 
+import os
 from random import randint
 
 import pytest
-from pyconv.pyconv import convert_num, input_to_int, input_validation
+import click
+from pyconv.pyconv import (
+    convert_num,
+    input_to_int,
+    input_validation,
+    convert_from_file_to_file,
+)
 
 
 @pytest.fixture(scope="module")
@@ -85,6 +92,47 @@ def conversion_perms(base_nums) -> dict:
     }
 
     return converted_nums
+
+
+def read_in_file_to_list(input_file: str) -> list:
+    """
+    Helper function reads a file line by line, appends to a list, returns the
+    list
+    Args:
+        file (str): string file path
+
+    Returns:
+        list: list of strings each element a line of the file.
+    """
+    line_list: list = []
+
+    with open(input_file, "r") as f:
+        for line in f:
+            line_list.append(line)
+
+    return line_list
+
+
+@pytest.fixture(scope="module")
+def converted_test_data() -> dict:
+    """
+    Reads in the test file data of binary, octal and hexidecimal numbers from
+    the test files, makes them into a list to be used for comparisons in later
+    tests.
+    Returns:
+        dict: dictionary with keys: 'b', 'o', 'x', values are lists from data
+        read in from test data.
+    """
+    test_dir = os.path.dirname(__file__)
+    bin_file = os.path.join(test_dir, "bin_nums.txt")
+    oct_file = os.path.join(test_dir, "octal_nums.txt")
+    hex_file = os.path.join(test_dir, "hex_nums.txt")
+
+    return {
+        "b": read_in_file_to_list(bin_file),
+        "o": read_in_file_to_list(oct_file),
+        "x": read_in_file_to_list(hex_file),
+    }
 
 
 def test_if_conversions_are_accurate(number_perms, conversion_perms) -> None:
@@ -230,6 +278,48 @@ def test_if_input_to_int_raises_value_error() -> None:
         input_int = input_to_int("12", "h")
 
         del input_int
+
+
+def test_if_output_has_been_converted_correctly(converted_test_data) -> None:
+    """
+    Uses method under test to read in decimal values from a text file and writes
+    it to file, output file is read in and made into a list then compared
+    against expected values
+    Args:
+        converted_test_data: pytest fixture with a dictionary of lists
+        containing expected data.
+    """
+    test_dir = test_dir = os.path.dirname(__file__)
+    decimal_path = os.path.join(test_dir, "decimal_nums.txt")
+    convert_path = os.path.join(test_dir, "convert_output.txt")
+    input_path: click.Path = click.Path(
+        exists=True, dir_okay=False, file_okay=True
+    ).convert(decimal_path, None, None)
+    output_path: click.Path = click.Path(exists=False).convert(convert_path, None, None)
+
+    convert_from_file_to_file(input_path, output_path, "d", "b")
+
+    output_list_b: list = read_in_file_to_list(convert_path)
+
+    convert_from_file_to_file(input_path, output_path, "d", "o")
+
+    output_list_o: list = read_in_file_to_list(convert_path)
+
+    convert_from_file_to_file(input_path, output_path, "d", "X")
+
+    output_list_x: list = read_in_file_to_list(convert_path)
+
+    print(output_list_b)
+
+    assert all(
+        converted_val in converted_test_data["b"] for converted_val in output_list_b
+    )
+    assert all(
+        converted_val in converted_test_data["o"] for converted_val in output_list_o
+    )
+    assert all(
+        converted_val in converted_test_data["x"] for converted_val in output_list_x
+    )
 
 
 # TODO run click integration tests
