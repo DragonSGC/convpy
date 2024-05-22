@@ -15,7 +15,7 @@ from random import randint
 
 import pytest
 import click
-from pyconv.pyconv import (
+from pyconv.pyconv_calc import (
     convert_num,
     input_to_int,
     input_validation,
