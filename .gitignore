@@ -161,3 +161,6 @@ cython_debug/
 
 # Scratch file
 scratch.py
+
+#vscode
+.vscode

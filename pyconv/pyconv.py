@@ -111,9 +111,16 @@ def from_file(
     )
 
     click.echo(
-        f"Processing {input_file} in the background."
-        f"Output will be saved to {output_file}."
+        click.style(
+            f"Processing {input_file} in the background. "
+            f"Output will be saved to {output_file}.",
+            fg="green",
+        )
     )
+
+    with open("pyconv_errors.log", "r", encoding="utf16") as errs:
+        lines = errs.readline()
+        click.echo(lines)
 
 
 if __name__ == "__main__":

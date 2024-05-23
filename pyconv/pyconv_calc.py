@@ -23,6 +23,8 @@ logging.basicConfig(
     handlers=[logging.FileHandler(log_filename, mode="w")],
 )
 
+logger = logging.getLogger()
+
 
 def convert_num(given_num: int, convert_to: str) -> str:
     """
@@ -96,7 +98,7 @@ def input_to_int(input_num: str, input_base: str) -> int:
     }
 
     if not input_validation(input_num).get(input_base):
-        raise ValueError(f"Invalid {input_base.upper()} number")
+        raise ValueError(f"Invalid {input_base} number")
     try:
         return base_conversion_functions[input_base](input_num)
     except KeyError:
@@ -126,7 +128,8 @@ def convert_from_file_to_file(
                     input_to_int(num, input_base), convert_to
                 )
             except ValueError as ve:
-                logging.error("line: %s : %s", line_num, ve)
+                logger.error("line: %s : %s", line_num, ve)
+                out.write("\n")
             else:
                 out.write(converted_num + "\n")
 
@@ -138,4 +141,5 @@ if __name__ == "__main__":
             "<input_base> <convert_to>"
         )
         sys.exit(1)
+    # Being called from pyconv.py as a child process
     convert_from_file_to_file(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

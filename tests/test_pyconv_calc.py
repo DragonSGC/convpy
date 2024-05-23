@@ -1,9 +1,8 @@
 """
-Filename: pyconv.py
+Filename: test_pyconv_calc.py
 Author: Simon Crampton
 Created: May 16, 2024
-Description: This module functions along with click setup to quickly convert
-            numbers to different base types
+Description: Contains the unit tests for the pyconv_calc.py file
 
 License:
     This code is provided under the GPL V3 License. See the LICENSE file
@@ -202,7 +201,7 @@ def test_binary_validation() -> None:
     Tests validation function if an invalid binary (contains characters other
     than 1's and 0's) is rejected and a valid binary is accepted
     """
-    invalid_binary: str = "10001113"
+    invalid_binary: str = "112"
     vaild_binary: str = "10111011"
 
     assert input_validation(invalid_binary).get("b") is False
@@ -271,7 +270,7 @@ def test_if_input_to_int_raises_value_error() -> None:
     Given invalid binary, octal, decimal, hexidecimal and base type flag
     """
     with pytest.raises(ValueError):
-        input_int = input_to_int("1002", "b")
+        input_int = input_to_int("112", "b")
         input_int = input_to_int("58", "o")
         input_int = input_to_int("23R", "d")
         input_int = input_to_int("5T", "x")
@@ -289,7 +288,8 @@ def test_if_output_has_been_converted_correctly(converted_test_data) -> None:
         converted_test_data: pytest fixture with a dictionary of lists
         containing expected data.
     """
-    test_dir = test_dir = os.path.dirname(__file__)
+    # Moking file paths working directory agnostic (tox from root vs pytest)
+    test_dir = os.path.dirname(__file__)
     decimal_path = os.path.join(test_dir, "decimal_nums.txt")
     convert_path = os.path.join(test_dir, "convert_output.txt")
     input_path: click.Path = click.Path(
@@ -320,6 +320,29 @@ def test_if_output_has_been_converted_correctly(converted_test_data) -> None:
     assert all(
         converted_val in converted_test_data["x"] for converted_val in output_list_x
     )
+
+
+def test_if_invalid_nums_in_file_are_logged_correctly(caplog) -> None:
+    """
+    Tests if log file generated if there is invalid numbers is generated and recording
+    information correctly
+    """
+    test_dir = os.path.dirname(__file__)
+    invalid_path = os.path.join(test_dir, "invalid_nums.txt")
+    convert_path = os.path.join(test_dir, "convert_output.txt")
+    input_path: click.Path = click.Path(
+        exists=True, dir_okay=False, file_okay=True
+    ).convert(invalid_path, None, None)
+    output_path: click.Path = click.Path(exists=False).convert(convert_path, None, None)
+
+    error_line_num_1: str = "6"  # expected error line numbers
+    error_line_num_2: str = "12"
+
+    convert_from_file_to_file(input_path, output_path, "b", "d")
+    log_records: list = caplog.text.split("\n")
+
+    assert error_line_num_1 in log_records[0]
+    assert error_line_num_2 in log_records[1]
 
 
 # TODO run click integration tests
