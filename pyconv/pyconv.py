@@ -15,7 +15,7 @@ import os
 import sys
 import click
 
-from pyconv_calc import convert_num, input_to_int
+from pyconv.pyconv_calc import convert_num, input_to_int
 
 
 @click.group()
@@ -91,7 +91,7 @@ def from_file(
     """
     if not convert_to:
         raise click.UsageError(
-            "You must specify a target conversion " "base using -b, -o, -d, or -x."
+            "You must specify a target conversion base using -b, -o, -d, or -x."
         )
 
     # Get the path to the pyconv_calc.py
@@ -117,14 +117,13 @@ def from_file(
             fg="green",
         )
     )
-
-    with open("pyconv_errors.log", "r", encoding="utf16") as errs:
-        lines = errs.readline()
-        click.echo(lines)
+    click.echo(
+        click.style(
+            "If there were any errors in conversion please see ./pyconc_errors.log",
+            fg="red",
+        )
+    )
 
 
 if __name__ == "__main__":
     pyconv()
-
-# TODO investigate how convert command can be run by calling pyconv args
-# TODO check if the error log file contains any inforamtion to warn user
