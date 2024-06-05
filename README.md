@@ -7,7 +7,7 @@ the conversions to another file. Orchestrated with the Click Module.
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pyconv.
 
 ```bash
 pip install pyconv
